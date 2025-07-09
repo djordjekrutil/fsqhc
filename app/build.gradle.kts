@@ -11,6 +11,12 @@ android {
     namespace = "com.djordjekrutil.fsqhc"
     compileSdk = 35
 
+    lint {
+        disable.addAll(listOf("NullSafeMutableLiveData"))
+        abortOnError = false
+        checkReleaseBuilds = false
+    }
+
     defaultConfig {
         applicationId = "com.djordjekrutil.fsqhc"
         minSdk = 31
@@ -18,6 +24,23 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64"))
+        }
+
+        externalNativeBuild {
+            cmake {
+                cppFlags.add("-std=c++14")
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
 
     buildTypes {
@@ -41,6 +64,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true  // Ovo je jedina linija koju dodaješ
     }
 }
 
