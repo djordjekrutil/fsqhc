@@ -64,7 +64,7 @@ android {
 
     buildFeatures {
         compose = true
-        buildConfig = true  // Ovo je jedina linija koju dodaješ
+        buildConfig = true
     }
 }
 

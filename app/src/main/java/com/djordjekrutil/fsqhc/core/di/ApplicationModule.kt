@@ -4,6 +4,7 @@ import android.content.Context
 import com.djordjekrutil.fsqhc.BuildConfig
 import com.djordjekrutil.fsqhc.core.util.ApiKeyManager
 import com.djordjekrutil.fsqhc.feature.db.AppDatabase
+import com.djordjekrutil.fsqhc.feature.repository.PlacesRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,7 +33,7 @@ class ApplicationModule() {
             .build()
     }
 
-    private fun createClient(apiKey : String): OkHttpClient {
+    private fun createClient(apiKey: String): OkHttpClient {
         val okHttpClientBuilder: OkHttpClient.Builder = OkHttpClient.Builder()
         okHttpClientBuilder.connectTimeout(30, TimeUnit.SECONDS)
         okHttpClientBuilder.readTimeout(30, TimeUnit.SECONDS)
@@ -60,8 +61,9 @@ class ApplicationModule() {
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
         AppDatabase.getDatabase(context)
 
-//    @Provides
-//    @Singleton
-//    fun provideFoursquareRepository(foursquareDataSource: FoursquareRepository.FoursquareRepositoryImpl): FoursquareRepository.INetwork =
-//        foursquareDataSource
+    @Provides
+    @Singleton
+    fun providePlacesRepository(
+        placesRepositoryImpl: PlacesRepository.PlacesRepositoryImpl
+    ): PlacesRepository = placesRepositoryImpl
 }
