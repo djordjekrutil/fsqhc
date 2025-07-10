@@ -96,6 +96,14 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.retrofit2.kotlin.coroutines.adapter)
 
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    // Gson
+    implementation(libs.gson)
+
     // OkHttp Logging Interceptor
     implementation(libs.logging.interceptor)
 

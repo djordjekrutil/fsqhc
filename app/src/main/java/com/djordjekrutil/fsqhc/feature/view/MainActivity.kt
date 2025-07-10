@@ -1,4 +1,4 @@
-package com.djordjekrutil.fsqhc
+package com.djordjekrutil.fsqhc.feature.view
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

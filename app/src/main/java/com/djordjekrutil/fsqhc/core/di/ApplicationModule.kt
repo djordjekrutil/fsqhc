@@ -1,10 +1,13 @@
 package com.djordjekrutil.fsqhc.core.di
 
+import android.content.Context
 import com.djordjekrutil.fsqhc.BuildConfig
 import com.djordjekrutil.fsqhc.core.util.ApiKeyManager
+import com.djordjekrutil.fsqhc.feature.db.AppDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -51,6 +54,11 @@ class ApplicationModule() {
 
         return okHttpClientBuilder.build()
     }
+
+    @Provides
+    @Singleton
+    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
+        AppDatabase.getDatabase(context)
 
 //    @Provides
 //    @Singleton
