@@ -10,8 +10,8 @@ import retrofit2.http.Query
 interface PlacesAPI {
 
     companion object{
-        private const val PLACES = "/search"
-        private const val PLACE = "/{fsqId}"
+        private const val PLACES = "search"
+        private const val PLACE = "v3/places/{fsqId}"
     }
 
     @GET(PLACES)

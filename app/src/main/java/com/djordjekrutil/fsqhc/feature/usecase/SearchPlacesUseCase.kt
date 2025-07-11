@@ -6,13 +6,14 @@ import com.djordjekrutil.fsqhc.core.functional.Either
 import com.djordjekrutil.fsqhc.core.interactor.UseCase
 import com.djordjekrutil.fsqhc.feature.model.Place
 import com.djordjekrutil.fsqhc.feature.repository.PlacesRepository
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class SearchPlacesUseCase @Inject constructor(
     private val placesRepository: PlacesRepository
-) : UseCase<List<Place>, SearchPlacesUseCase.Params>() {
+) : UseCase<Flow<List<Place>>, SearchPlacesUseCase.Params>() {
 
-    override suspend fun run(params: Params): Either<Failure, List<Place>> {
+    override suspend fun run(params: Params): Either<Failure, Flow<List<Place>>> {
         return placesRepository.searchPlaces(params.query)
     }
 

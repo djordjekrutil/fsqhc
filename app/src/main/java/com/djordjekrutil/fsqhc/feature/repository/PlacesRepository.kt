@@ -10,12 +10,14 @@ import com.djordjekrutil.fsqhc.feature.model.PlaceDto
 import com.djordjekrutil.fsqhc.feature.model.PlaceEntity
 import com.djordjekrutil.fsqhc.feature.service.PlacesService
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 interface PlacesRepository {
 
-    suspend fun searchPlaces(query: String): Either<Failure, List<Place>>
+    suspend fun searchPlaces(query: String): Either<Failure, Flow<List<Place>>>
     suspend fun getPlace(fsqId: String): Either<Failure, Place>
 
     class Network @Inject constructor(
@@ -48,8 +50,10 @@ interface PlacesRepository {
     class Database @Inject constructor(
         private val appDatabase: AppDatabase
     ) {
-        suspend fun searchPlaces(query: String): List<PlaceEntity> {
-            return appDatabase.PlaceDao().searchPlaces(query)
+        fun searchPlaces(query: String): Flow<List<PlaceEntity>> {
+            return appDatabase.PlaceDao().searchPlaces(query).map { entities ->
+                entities
+            }
         }
 
         suspend fun getPlace(fsqId: String): PlaceEntity? {
@@ -64,15 +68,6 @@ interface PlacesRepository {
                 Either.Left(Failure.DatabaseError)
             }
         }
-
-        suspend fun deleteOldResults(query: String): Either<Failure, UseCase.None> {
-            return try {
-                appDatabase.PlaceDao().deleteOldResults(query)
-                Either.Right(UseCase.None())
-            } catch (e: Exception) {
-                Either.Left(Failure.DatabaseError)
-            }
-        }
     }
 
     class PlacesRepositoryImpl @Inject constructor(
@@ -80,24 +75,26 @@ interface PlacesRepository {
         private val database: Database
     ) : PlacesRepository {
 
-        override suspend fun searchPlaces(query: String): Either<Failure, List<Place>> {
+        override suspend fun searchPlaces(query: String): Either<Failure, Flow<List<Place>>> {
             return when (val networkResult = network.searchPlaces(query)) {
                 is Either.Right -> {
-                    val places = networkResult.b.map { it.toPlace() }
-                    val placeEntities = places.map { it.toEntity(query) }
+                    try {
+                        val places = networkResult.b.map { it.toPlace() }
+                        val placeEntities = places.map { it.toEntity(query) }
+                        database.insertPlaces(placeEntities)
 
-                    database.deleteOldResults(query)
-                    database.insertPlaces(placeEntities)
-
-                    Either.Right(places)
+                        val directFlow = kotlinx.coroutines.flow.flowOf(places)
+                        Either.Right(directFlow)
+                    } catch (e: Exception) {
+                        Either.Left(Failure.DatabaseError)
+                    }
                 }
                 is Either.Left -> {
                     try {
-                        val localPlaces = withContext(Dispatchers.IO) {
-                            database.searchPlaces(query)
+                        val placesFlow = database.searchPlaces(query).map { entities ->
+                            entities.map { it.toPlace() }
                         }
-                        val places = localPlaces.map { it.toPlace() }
-                        Either.Right(places)
+                        Either.Right(placesFlow)
                     } catch (e: Exception) {
                         Either.Left(Failure.DatabaseError)
                     }
@@ -110,7 +107,6 @@ interface PlacesRepository {
                 is Either.Right -> {
                     val place = networkResult.b.toPlace()
                     val placeEntity = place.toEntity("")
-
                     database.insertPlaces(listOf(placeEntity))
 
                     Either.Right(place)
