@@ -1,34 +1,45 @@
 package com.djordjekrutil.fsqhc.ui.component
 
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Text
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.NavDestination
-import androidx.navigation.NavHostController
 import com.djordjekrutil.fsqhc.feature.navigation.Screens
 
 @Composable
-fun BottomNavBar(
-    navController: NavHostController,
+fun BottomBar(
+    navController: NavController,
     screens: List<Screens>,
     currentDestination: NavDestination?
 ) {
-    NavigationBar {
-        screens.forEach { screen ->
-            NavigationBarItem(
-                icon = { Icon(screen.icon, contentDescription = screen.label) },
-                label = { Text(screen.label) },
-                selected = currentDestination?.route == screen.route,
-                onClick = {
-                    navController.navigate(screen.route) {
-                        popUpTo(navController.graph.startDestinationId) { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
-            )
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(width = 0.5.dp, color = Color.LightGray),
+        color = Color.White,
+        shadowElevation = 4.dp
+    ) {
+        NavigationBar(
+            containerColor = Color.White,
+            tonalElevation = 0.dp
+        ) {
+            screens.forEach { screen ->
+                NavigationBarItem(
+                    selected = currentDestination?.route == screen.route,
+                    onClick = {
+                        if (currentDestination?.route != screen.route) {
+                            navController.navigate(screen.route)
+                        }
+                    },
+                    icon = { Icon(screen.icon, contentDescription = null) },
+                    label = { Text(screen.label) }
+                )
+            }
         }
     }
 }

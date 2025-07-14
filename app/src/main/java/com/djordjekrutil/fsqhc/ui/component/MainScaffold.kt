@@ -16,7 +16,7 @@ fun MainScaffold(navController: NavHostController) {
 
     Scaffold(
         bottomBar = {
-            BottomNavBar(
+            BottomBar(
                 navController = navController,
                 screens = bottomScreens,
                 currentDestination = currentDestination
