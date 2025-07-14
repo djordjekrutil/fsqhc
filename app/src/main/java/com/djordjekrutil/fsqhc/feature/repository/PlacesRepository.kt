@@ -17,16 +17,16 @@ import javax.inject.Inject
 
 interface PlacesRepository {
 
-    suspend fun searchPlaces(query: String): Either<Failure, Flow<List<Place>>>
+    suspend fun searchPlaces(query: String, lat : Double, long : Double): Either<Failure, Flow<List<Place>>>
     suspend fun getPlace(fsqId: String): Either<Failure, Place>
 
     class Network @Inject constructor(
         private val networkHandler: NetworkHandler,
         private val placesService: PlacesService
     ) {
-        fun searchPlaces(query: String): Either<Failure, List<PlaceDto>> {
+        suspend fun searchPlaces(query: String, lat : Double, long : Double): Either<Failure, List<PlaceDto>> {
             return if (networkHandler.isConnected) {
-                val response = placesService.searchPlaces(query).execute()
+                val response = placesService.searchPlaces(query,"$lat,$long")
                 response.body()?.let {
                     Either.Right(it.results)
                 } ?: Either.Left(Failure.ServerError)
@@ -35,9 +35,9 @@ interface PlacesRepository {
             }
         }
 
-        fun getPlace(fsqId: String): Either<Failure, PlaceDto> {
+        suspend fun getPlace(fsqId: String): Either<Failure, PlaceDto> {
             return if (networkHandler.isConnected) {
-                val response = placesService.getPlace(fsqId).execute()
+                val response = placesService.getPlace(fsqId)
                 response.body()?.let {
                     Either.Right(it)
                 } ?: Either.Left(Failure.ServerError)
@@ -75,8 +75,8 @@ interface PlacesRepository {
         private val database: Database
     ) : PlacesRepository {
 
-        override suspend fun searchPlaces(query: String): Either<Failure, Flow<List<Place>>> {
-            return when (val networkResult = network.searchPlaces(query)) {
+        override suspend fun searchPlaces(query: String, lat : Double, long : Double): Either<Failure, Flow<List<Place>>> {
+            return when (val networkResult = network.searchPlaces(query, lat, long)) {
                 is Either.Right -> {
                     try {
                         val places = networkResult.b.map { it.toPlace() }

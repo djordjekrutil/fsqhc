@@ -14,8 +14,14 @@ class SearchPlacesUseCase @Inject constructor(
 ) : UseCase<Flow<List<Place>>, SearchPlacesUseCase.Params>() {
 
     override suspend fun run(params: Params): Either<Failure, Flow<List<Place>>> {
-        return placesRepository.searchPlaces(params.query)
+        return placesRepository.searchPlaces(params.query, params.lat, params.lon)
     }
 
-    data class Params(val query: String)
+    data class Params(val query: String, val lat : Double, val lon: Double) {
+        companion object {
+            fun create(query: String, lat: Double, lon: Double): Params {
+                return Params(query, lat, lon)
+            }
+        }
+    }
 }

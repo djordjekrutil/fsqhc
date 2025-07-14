@@ -4,6 +4,7 @@ import android.content.Context
 import com.djordjekrutil.fsqhc.BuildConfig
 import com.djordjekrutil.fsqhc.core.util.ApiKeyManager
 import com.djordjekrutil.fsqhc.feature.db.AppDatabase
+import com.djordjekrutil.fsqhc.feature.repository.LocationRepository
 import com.djordjekrutil.fsqhc.feature.repository.PlacesRepository
 import dagger.Module
 import dagger.Provides
@@ -66,4 +67,10 @@ class ApplicationModule() {
     fun providePlacesRepository(
         placesRepositoryImpl: PlacesRepository.PlacesRepositoryImpl
     ): PlacesRepository = placesRepositoryImpl
+
+    @Provides
+    @Singleton
+    fun provideLocationRepository(
+        locationRepositoryImpl: LocationRepository.LocationRepositoryImpl
+    ): LocationRepository = locationRepositoryImpl
 }

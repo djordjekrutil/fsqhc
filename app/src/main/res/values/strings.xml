@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">FSQHC</string>
     <string name="error">Error: %1$s</string>
-    <string name="search_venues">Search venues, restaurants, cafes...</string>
+    <string name="not_ready_for_search">Please enable location</string>
+    <string name="search_venues">Search venues, restaurants, cafes…</string>
+    <string name="click_to_enable_location">Click to enable location</string>
 </resources>

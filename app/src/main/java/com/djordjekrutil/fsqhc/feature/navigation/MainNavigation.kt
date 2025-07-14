@@ -1,8 +1,6 @@
 package com.djordjekrutil.fsqhc.feature.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -22,12 +20,10 @@ fun MainNavigation(navController: NavHostController, modifier: Modifier = Modifi
     ) {
         composable(Screens.Search.route) {
             val viewModel: PlacesViewModel = hiltViewModel()
-            val state by viewModel.uiState.collectAsState()
 
             SearchScreen(
-                state = state,
+                viewModel = viewModel,
                 onItemClick = { id -> navController.navigate("details/$id") },
-                onSearch = { query -> viewModel.searchPlaces(query) }
             )
         }
         composable(Screens.Favorites.route) {
