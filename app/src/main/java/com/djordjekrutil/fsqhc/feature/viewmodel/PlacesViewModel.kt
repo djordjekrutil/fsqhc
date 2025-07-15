@@ -7,13 +7,14 @@ import com.djordjekrutil.fsqhc.core.functional.Either
 import com.djordjekrutil.fsqhc.core.interactor.UseCase
 import com.djordjekrutil.fsqhc.feature.model.Place
 import com.djordjekrutil.fsqhc.feature.repository.LocationRepository
+import com.djordjekrutil.fsqhc.feature.repository.PagedPlacesResult
 import com.djordjekrutil.fsqhc.feature.usecase.GetCurrentLocationUseCase
 import com.djordjekrutil.fsqhc.feature.usecase.SearchPlacesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,7 +28,16 @@ class PlacesViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<PlacesScreenState>(PlacesScreenState.Initial)
     val uiState: StateFlow<PlacesScreenState> = _uiState.asStateFlow()
 
+    private val _places = MutableStateFlow<List<Place>>(emptyList())
+
+    private val _hasNextPage = MutableStateFlow(false)
+    val hasNextPage: StateFlow<Boolean> = _hasNextPage
+
+    private var currentQuery : String? = null
+    private var nextCursor: String? = null
+
     private var currentLocation: Location? = null
+    private var loadingMoreInProgress = false
 
     init {
         initializeLocationCheck()
@@ -65,7 +75,7 @@ class PlacesViewModel @Inject constructor(
     private fun handleLocationResult(result: Either<*, Location>) {
         when (result) {
             is Either.Left -> {
-                updateState(PlacesScreenState.Error("Failed to get current location"))
+                updateState(PlacesScreenState.Error(PlacesError.Location.FailedToGetLocation))
             }
             is Either.Right -> {
                 currentLocation = result.b
@@ -79,7 +89,7 @@ class PlacesViewModel @Inject constructor(
 
         when {
             !hasValidLocation() -> {
-                updateState(PlacesScreenState.Error("Location not available"))
+                updateState(PlacesScreenState.Error(PlacesError.Location.NotAvailable))
             }
             trimmedQuery.isBlank() -> {
                 updateState(PlacesScreenState.ReadyForSearch)
@@ -94,6 +104,7 @@ class PlacesViewModel @Inject constructor(
 
     private fun performSearch(query: String) {
         val location = currentLocation ?: return
+        currentQuery = query
 
         updateState(PlacesScreenState.Searching)
 
@@ -104,13 +115,53 @@ class PlacesViewModel @Inject constructor(
         }
     }
 
-    private fun handleSearchResult(result: Either<*, Flow<List<Place>>>) {
+    fun loadNextPage() {
+        if (nextCursor.isNullOrEmpty() || !hasNextPage.value || loadingMoreInProgress) return
+
+        val query = currentQuery ?: return
+        val location = currentLocation ?: return
+
+        viewModelScope.launch {
+            loadingMoreInProgress = true
+            val params = SearchPlacesUseCase.Params(query, location.latitude, location.longitude, nextCursor)
+            val result = searchPlacesUseCase.run(params)
+            handleMoreItemsResult(result)
+        }
+    }
+
+    private fun handleSearchResult(result: Either<*, PagedPlacesResult>) {
         when (result) {
             is Either.Right -> {
-                updateState(PlacesScreenState.Content(result.b))
+                viewModelScope.launch {
+                    _places.value = result.b.places.first()
+                    updateState(PlacesScreenState.Content(_places))
+                    _hasNextPage.value = !result.b.nextCursor.isNullOrEmpty()
+                    nextCursor = result.b.nextCursor
+                }
             }
             is Either.Left -> {
-                updateState(PlacesScreenState.Error("Failed to search places"))
+                updateState(PlacesScreenState.Error(PlacesError.SearchFailed))
+                _hasNextPage.value = false
+                nextCursor = ""
+            }
+        }
+    }
+
+    private fun handleMoreItemsResult(result: Either<*, PagedPlacesResult>) {
+        when (result) {
+            is Either.Right -> {
+                viewModelScope.launch {
+                    _places.value = _places.value + result.b.places.first()
+                    updateState(PlacesScreenState.Content(_places))
+                    _hasNextPage.value = !result.b.nextCursor.isNullOrEmpty()
+                    nextCursor = result.b.nextCursor
+                    loadingMoreInProgress = false
+                }
+            }
+            is Either.Left -> {
+                _hasNextPage.value = false
+                nextCursor = ""
+                loadingMoreInProgress = false
             }
         }
     }
@@ -132,6 +183,14 @@ sealed class PlacesScreenState {
     data object LoadingLocation : PlacesScreenState()
     data object ReadyForSearch : PlacesScreenState()
     data object Searching : PlacesScreenState()
-    data class Content(val places: Flow<List<Place>>) : PlacesScreenState()
-    data class Error(val message: String) : PlacesScreenState()
+    data class Content(val places: StateFlow<List<Place>>) : PlacesScreenState()
+    data class Error(val error: PlacesError) : PlacesScreenState()
+}
+
+sealed class PlacesError {
+    sealed class Location : PlacesError() {
+        data object FailedToGetLocation : Location()
+        data object NotAvailable : Location()
+    }
+    data object SearchFailed : PlacesError()
 }

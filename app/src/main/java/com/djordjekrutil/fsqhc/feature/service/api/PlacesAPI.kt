@@ -9,13 +9,17 @@ import retrofit2.http.Query
 
 interface PlacesAPI {
 
-    companion object{
+    companion object {
         private const val PLACES = "search"
         private const val PLACE = "v3/places/{fsqId}"
     }
 
     @GET(PLACES)
-    suspend fun searchPlaces(@Query("query") query: String, @Query("ll") ll: String): Response<FoursquareResponse>
+    suspend fun searchPlaces(
+        @Query("query") query: String,
+        @Query("ll") ll: String,
+        @Query("cursor") nextCursor: String? = null
+    ): Response<FoursquareResponse>
 
     @GET(PLACE)
     suspend fun getPlace(@Path("fsqId") fsqId: String): Response<PlaceDto>

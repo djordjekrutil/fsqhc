@@ -4,6 +4,7 @@ import com.djordjekrutil.fsqhc.core.exception.Failure
 import com.djordjekrutil.fsqhc.core.functional.Either
 import com.djordjekrutil.fsqhc.core.interactor.UseCase
 import com.djordjekrutil.fsqhc.core.platform.NetworkHandler
+import com.djordjekrutil.fsqhc.core.util.extractCursorFromLinkHeader
 import com.djordjekrutil.fsqhc.feature.db.AppDatabase
 import com.djordjekrutil.fsqhc.feature.model.Place
 import com.djordjekrutil.fsqhc.feature.model.PlaceDto
@@ -11,24 +12,43 @@ import com.djordjekrutil.fsqhc.feature.model.PlaceEntity
 import com.djordjekrutil.fsqhc.feature.service.PlacesService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 interface PlacesRepository {
 
-    suspend fun searchPlaces(query: String, lat : Double, long : Double): Either<Failure, Flow<List<Place>>>
+    suspend fun searchPlaces(
+        query: String,
+        lat: Double,
+        long: Double,
+        nextCursor: String? = null
+    ): Either<Failure, PagedPlacesResult>
+
     suspend fun getPlace(fsqId: String): Either<Failure, Place>
 
     class Network @Inject constructor(
         private val networkHandler: NetworkHandler,
         private val placesService: PlacesService
     ) {
-        suspend fun searchPlaces(query: String, lat : Double, long : Double): Either<Failure, List<PlaceDto>> {
+        suspend fun searchPlaces(
+            query: String,
+            lat: Double,
+            long: Double,
+            nextCursor: String? = null
+        ): Either<Failure, PagedPlacesResult> {
             return if (networkHandler.isConnected) {
-                val response = placesService.searchPlaces(query,"$lat,$long")
+                val response = placesService.searchPlaces(query, "$lat,$long", nextCursor)
                 response.body()?.let {
-                    Either.Right(it.results)
+                    val next = response.headers()["Link"]
+                    return Either.Right(
+                        PagedPlacesResult(
+                            places = flowOf(it.results.map { it.toPlace() }),
+                            nextCursor = extractCursorFromLinkHeader(next.orEmpty())
+                        )
+                    )
                 } ?: Either.Left(Failure.ServerError)
             } else {
                 Either.Left(Failure.NetworkConnection)
@@ -64,7 +84,7 @@ interface PlacesRepository {
             return try {
                 appDatabase.PlaceDao().insertPlaces(places)
                 Either.Right(UseCase.None())
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 Either.Left(Failure.DatabaseError)
             }
         }
@@ -75,27 +95,35 @@ interface PlacesRepository {
         private val database: Database
     ) : PlacesRepository {
 
-        override suspend fun searchPlaces(query: String, lat : Double, long : Double): Either<Failure, Flow<List<Place>>> {
-            return when (val networkResult = network.searchPlaces(query, lat, long)) {
+        override suspend fun searchPlaces(
+            query: String,
+            lat: Double,
+            long: Double,
+            nextCursor: String?
+        ): Either<Failure, PagedPlacesResult> {
+            return when (val networkResult = network.searchPlaces(query, lat, long, nextCursor)) {
                 is Either.Right -> {
                     try {
-                        val places = networkResult.b.map { it.toPlace() }
+                        val placesFlow = networkResult.b.places
+                        val nextCursor = networkResult.b.nextCursor.orEmpty()
+
+                        val places = placesFlow.first()
                         val placeEntities = places.map { it.toEntity(query) }
                         database.insertPlaces(placeEntities)
 
-                        val directFlow = kotlinx.coroutines.flow.flowOf(places)
-                        Either.Right(directFlow)
-                    } catch (e: Exception) {
+                        return Either.Right(PagedPlacesResult(placesFlow, nextCursor))
+                    } catch (_: Exception) {
                         Either.Left(Failure.DatabaseError)
                     }
                 }
+
                 is Either.Left -> {
                     try {
                         val placesFlow = database.searchPlaces(query).map { entities ->
                             entities.map { it.toPlace() }
                         }
-                        Either.Right(placesFlow)
-                    } catch (e: Exception) {
+                        Either.Right(PagedPlacesResult(placesFlow, null))
+                    } catch (_: Exception) {
                         Either.Left(Failure.DatabaseError)
                     }
                 }
@@ -111,6 +139,7 @@ interface PlacesRepository {
 
                     Either.Right(place)
                 }
+
                 is Either.Left -> {
                     try {
                         val localPlace = withContext(Dispatchers.IO) {
@@ -119,7 +148,7 @@ interface PlacesRepository {
                         localPlace?.let {
                             Either.Right(it.toPlace())
                         } ?: Either.Left(Failure.DatabaseError)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         Either.Left(Failure.DatabaseError)
                     }
                 }
@@ -127,6 +156,11 @@ interface PlacesRepository {
         }
     }
 }
+
+data class PagedPlacesResult(
+    val places: Flow<List<Place>>,
+    val nextCursor: String?
+)
 
 
 fun PlaceDto.toPlace(): Place {

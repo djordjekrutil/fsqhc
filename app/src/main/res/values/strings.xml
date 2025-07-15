@@ -4,4 +4,24 @@
     <string name="not_ready_for_search">Please enable location</string>
     <string name="search_venues">Search venues, restaurants, cafes…</string>
     <string name="click_to_enable_location">Click to enable location</string>
+    <string name="location_access_is_required">Location access is required</string>
+    <string name="enable_location">Enable Location</string>
+    <string name="please_allow_location_access">Please allow location access</string>
+    <string name="try_again">Try Again</string>
+    <string name="go_to_settings_permission"><![CDATA[Go to Settings > Permissions > Location and enable access (including precise location)]]></string>
+    <string name="open_settings">Open Settings</string>
+    <string name="already_changed_settings">Already changed settings</string>
+    <string name="getting_your_location">Getting your location…</string>
+    <string name="tap_to_enable_location">Tap to enable location</string>
+    <string name="enable_location_in_settings">Enable location in settings</string>
+    <string name="getting_location">Getting location…</string>
+    <string name="permission_denied">Location permission denied</string>
+    <string name="permission_permanently_denied">Permission permanently denied</string>
+    <string name="provider_unavailable">Location provider unavailable</string>
+    <string name="location_timeout">Location request timed out</string>
+    <string name="unknown_location_error">Failed to get current location</string>
+    <string name="search_error">Failed to search for places</string>
+    <string name="failed_to_get_location">Failed to get location.</string>
+    <string name="location_not_available">Location not available.</string>
+    <string name="search_failed">Search failed.</string>
 </resources>

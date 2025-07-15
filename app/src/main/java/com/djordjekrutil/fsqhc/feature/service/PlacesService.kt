@@ -14,7 +14,15 @@ class PlacesService
 
     private val placesApi by lazy { retrofit.create(PlacesAPI::class.java) }
 
-    override suspend fun searchPlaces(query: String, ll : String): Response<FoursquareResponse> = placesApi.searchPlaces(query, ll)
+    override suspend fun searchPlaces(
+        query: String,
+        ll: String,
+        nextCursor: String?
+    ): Response<FoursquareResponse> = placesApi.searchPlaces(
+        query,
+        ll,
+        nextCursor
+    )
 
     override suspend fun getPlace(fsqId: String): Response<PlaceDto> = placesApi.getPlace(fsqId)
 }

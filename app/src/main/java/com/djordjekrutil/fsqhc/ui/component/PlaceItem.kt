@@ -1,10 +1,8 @@
 package com.djordjekrutil.fsqhc.ui.component
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,9 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Card
@@ -56,22 +53,6 @@ fun PlaceItem(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.Top,
         ) {
-            // Icon placeholder
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(Color(0xFF8B4513), shape = RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Home,
-                    contentDescription = null,
-                    tint = Color.White
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -134,7 +115,7 @@ fun PlaceItem(
                         fontWeight = FontWeight.Bold
                     )
                     Icon(
-                        imageVector = Icons.Default.KeyboardArrowRight,
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                         contentDescription = null
                     )
                 }
