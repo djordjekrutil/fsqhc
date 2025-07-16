@@ -31,4 +31,6 @@
     <string name="failed_to_load_favorites">Failed to load favorites</string>
     <string name="add_places_to_your_favorites_to_see_them_here">Add places to your favorites to see them here.</string>
     <string name="no_places_found_matching_your_search">No places found matching your search.</string>
+    <string name="loading_place_details">Loading place details…</string>
+    <string name="failed_to_load_place_details">Failed to load place details</string>
 </resources>

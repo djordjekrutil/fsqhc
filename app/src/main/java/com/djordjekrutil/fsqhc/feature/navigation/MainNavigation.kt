@@ -1,5 +1,8 @@
 package com.djordjekrutil.fsqhc.feature.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -10,14 +13,28 @@ import com.djordjekrutil.fsqhc.feature.view.screen.DetailsScreen
 import com.djordjekrutil.fsqhc.feature.view.screen.FavoritesScreen
 import com.djordjekrutil.fsqhc.feature.view.screen.SearchScreen
 import com.djordjekrutil.fsqhc.feature.viewmodel.FavoritesViewModel
+import com.djordjekrutil.fsqhc.feature.viewmodel.PlaceDetailsViewModel
 import com.djordjekrutil.fsqhc.feature.viewmodel.PlacesViewModel
 
 @Composable
 fun MainNavigation(navController: NavHostController, modifier: Modifier = Modifier) {
+    val animationDuration = 300
     NavHost(
         navController = navController,
         startDestination = Screens.Search.route,
         modifier = modifier,
+        enterTransition = {
+            fadeIn(animationSpec = tween(animationDuration))
+        },
+        exitTransition = {
+            fadeOut(animationSpec = tween(animationDuration))
+        },
+        popEnterTransition = {
+            fadeIn(animationSpec = tween(animationDuration))
+        },
+        popExitTransition = {
+            fadeOut(animationSpec = tween(animationDuration))
+        }
     ) {
         composable(Screens.Search.route) {
             val viewModel: PlacesViewModel = hiltViewModel()
@@ -26,9 +43,6 @@ fun MainNavigation(navController: NavHostController, modifier: Modifier = Modifi
                 viewModel = viewModel,
                 onItemClick = { id ->
                     navController.navigate("details/$id") {
-                        popUpTo(Screens.Search.route) {
-                            inclusive = true
-                        }
                         launchSingleTop = true
                     }
                 },
@@ -37,21 +51,19 @@ fun MainNavigation(navController: NavHostController, modifier: Modifier = Modifi
         composable(Screens.Favorites.route) {
             val viewModel: FavoritesViewModel = hiltViewModel()
 
-            FavoritesScreen (
+            FavoritesScreen(
                 viewModel = viewModel,
                 onItemClick = { id ->
                     navController.navigate("details/$id") {
-                        popUpTo(Screens.Search.route) {
-                            inclusive = true
-                        }
                         launchSingleTop = true
                     }
                 },
             )
         }
         composable("details/{id}") { backStackEntry ->
-            val id = backStackEntry.arguments?.getString("id") ?: ""
-            DetailsScreen(itemId = id)
+            val viewModel: PlaceDetailsViewModel = hiltViewModel()
+
+            DetailsScreen(viewModel)
         }
     }
 }
