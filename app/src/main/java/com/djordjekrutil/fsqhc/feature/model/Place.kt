@@ -7,5 +7,6 @@ data class Place(
     val latitude: Double?,
     val longitude: Double?,
     val categories: List<String>,
-    val distance: Int?
+    val distance: Int?,
+    val isFavorite: Boolean,
 )

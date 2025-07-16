@@ -32,6 +32,7 @@ fun PlaceEntity.toDomain(): Place {
         latitude = latitude,
         longitude = longitude,
         categories = categoryList,
-        distance = distance
+        distance = distance,
+        isFavorite = isFavorite
     )
 }

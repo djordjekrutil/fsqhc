@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import com.djordjekrutil.fsqhc.feature.view.screen.DetailsScreen
 import com.djordjekrutil.fsqhc.feature.view.screen.FavoritesScreen
 import com.djordjekrutil.fsqhc.feature.view.screen.SearchScreen
+import com.djordjekrutil.fsqhc.feature.viewmodel.FavoritesViewModel
 import com.djordjekrutil.fsqhc.feature.viewmodel.PlacesViewModel
 
 @Composable
@@ -23,11 +24,30 @@ fun MainNavigation(navController: NavHostController, modifier: Modifier = Modifi
 
             SearchScreen(
                 viewModel = viewModel,
-                onItemClick = { id -> navController.navigate("details/$id") },
+                onItemClick = { id ->
+                    navController.navigate("details/$id") {
+                        popUpTo(Screens.Search.route) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                },
             )
         }
         composable(Screens.Favorites.route) {
-            FavoritesScreen { id -> navController.navigate("details/$id") }
+            val viewModel: FavoritesViewModel = hiltViewModel()
+
+            FavoritesScreen (
+                viewModel = viewModel,
+                onItemClick = { id ->
+                    navController.navigate("details/$id") {
+                        popUpTo(Screens.Search.route) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                },
+            )
         }
         composable("details/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id") ?: ""

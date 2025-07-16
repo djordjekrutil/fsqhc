@@ -1,10 +1,12 @@
 package com.djordjekrutil.fsqhc.feature.view.screen
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -32,6 +34,8 @@ import com.djordjekrutil.fsqhc.R
 import com.djordjekrutil.fsqhc.feature.viewmodel.PlacesError
 import com.djordjekrutil.fsqhc.feature.viewmodel.PlacesScreenState
 import com.djordjekrutil.fsqhc.feature.viewmodel.PlacesViewModel
+import com.djordjekrutil.fsqhc.ui.component.CenteredContent
+import com.djordjekrutil.fsqhc.ui.component.ExitAppDialog
 import com.djordjekrutil.fsqhc.ui.component.LoadingItem
 import com.djordjekrutil.fsqhc.ui.component.LoadingPlaceItem
 import com.djordjekrutil.fsqhc.ui.component.NoSearchResultsState
@@ -49,14 +53,25 @@ fun SearchScreen(
     viewModel: PlacesViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
-    val hasNexPage by viewModel.hasNextPage.collectAsState()
+    val hasNextPage by viewModel.hasNextPage.collectAsState()
     var query by rememberSaveable { mutableStateOf("") }
     val context = LocalContext.current
     val debouncePeriod = 500L
     val lazyListState = rememberLazyListState()
     val focusManager = LocalFocusManager.current
-
     val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+    var showExitDialog by remember { mutableStateOf(false) }
+
+    BackHandler {
+        showExitDialog = true
+    }
+
+    if (showExitDialog) {
+        ExitAppDialog(
+            onConfirmExit = { (context as? Activity)?.finish() },
+            onDismiss = { showExitDialog = false }
+        )
+    }
 
     LaunchedEffect(lazyListState) {
         snapshotFlow { lazyListState.layoutInfo.visibleItemsInfo }
@@ -65,8 +80,7 @@ fun SearchScreen(
                 val totalItems = lazyListState.layoutInfo.totalItemsCount
 
                 if (lastVisibleItem != null && lastVisibleItem.index == totalItems - 1) {
-                    if (hasNexPage)
-                    {
+                    if (hasNextPage) {
                         viewModel.loadNextPage()
                     }
                 }
@@ -160,7 +174,6 @@ fun SearchScreen(
 
                     OutlinedTextField(
                         value = query,
-
                         onValueChange = {
                             query = it
                             searchJob?.cancel()
@@ -268,12 +281,16 @@ fun SearchScreen(
                             item { NoSearchResultsState() }
                         }
                     } else {
-                        LazyColumn (state = lazyListState){
+                        LazyColumn(state = lazyListState) {
                             items(places, key = { place -> place.fsqId }) { place ->
-                                PlaceItem(place = place, onClick = { onItemClick(place.fsqId) })
+                                PlaceItem(
+                                    place = place,
+                                    onClick = { onItemClick(place.fsqId) },
+                                    onFavoritesClick = viewModel::toggleFavorite
+                                )
                             }
                             item {
-                                if (hasNexPage) {
+                                if (hasNextPage) {
                                     LoadingItem()
                                 }
                             }
@@ -283,16 +300,6 @@ fun SearchScreen(
             }
         }
     }
-}
-
-@Composable
-private fun CenteredContent(content: @Composable () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        contentAlignment = Alignment.Center
-    ) { content() }
 }
 
 @Composable

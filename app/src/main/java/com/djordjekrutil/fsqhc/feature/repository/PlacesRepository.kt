@@ -29,6 +29,10 @@ interface PlacesRepository {
 
     suspend fun getPlace(fsqId: String): Either<Failure, Place>
 
+    suspend fun setFavorite(fsqId: String, isFavorite: Boolean): Either<Failure, UseCase.None>
+
+    suspend fun getFavoritePlaces(): Flow<List<Place>>
+
     class Network @Inject constructor(
         private val networkHandler: NetworkHandler,
         private val placesService: PlacesService
@@ -86,6 +90,21 @@ interface PlacesRepository {
                 Either.Right(UseCase.None())
             } catch (_: Exception) {
                 Either.Left(Failure.DatabaseError)
+            }
+        }
+
+        suspend fun setFavorite(fsqId: String, isFavorite: Boolean): Either<Failure, UseCase.None> {
+            return try {
+                appDatabase.PlaceDao().updateFavoriteStatus(fsqId, isFavorite)
+                Either.Right(UseCase.None())
+            } catch (_: Exception) {
+                Either.Left(Failure.DatabaseError)
+            }
+        }
+
+        fun getFavoritePlaces(): Flow<List<Place>> {
+            return appDatabase.PlaceDao().getFavoritePlaces().map { entities ->
+                entities.map { it.toPlace() }
             }
         }
     }
@@ -154,6 +173,14 @@ interface PlacesRepository {
                 }
             }
         }
+
+        override suspend fun setFavorite(fsqId: String, isFavorite: Boolean): Either<Failure, UseCase.None> {
+            return database.setFavorite(fsqId, isFavorite)
+        }
+
+        override suspend fun getFavoritePlaces(): Flow<List<Place>> {
+            return database.getFavoritePlaces()
+        }
     }
 }
 
@@ -171,7 +198,8 @@ fun PlaceDto.toPlace(): Place {
         latitude = this.location?.lat,
         longitude = this.location?.lng,
         categories = this.categories?.map { it.name } ?: emptyList(),
-        distance = this.distance
+        distance = this.distance,
+        isFavorite = false
     )
 }
 
@@ -196,6 +224,7 @@ fun PlaceEntity.toPlace(): Place {
         latitude = this.latitude,
         longitude = this.longitude,
         categories = this.categories?.split(",") ?: emptyList(),
-        distance = this.distance
+        distance = this.distance,
+        isFavorite = this.isFavorite
     )
 }

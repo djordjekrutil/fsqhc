@@ -24,4 +24,11 @@
     <string name="failed_to_get_location">Failed to get location.</string>
     <string name="location_not_available">Location not available.</string>
     <string name="search_failed">Search failed.</string>
+    <string name="exit_application">Exit Application</string>
+    <string name="do_you_want_to_exit_the_application">Do you want to exit the application?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="failed_to_load_favorites">Failed to load favorites</string>
+    <string name="add_places_to_your_favorites_to_see_them_here">Add places to your favorites to see them here.</string>
+    <string name="no_places_found_matching_your_search">No places found matching your search.</string>
 </resources>

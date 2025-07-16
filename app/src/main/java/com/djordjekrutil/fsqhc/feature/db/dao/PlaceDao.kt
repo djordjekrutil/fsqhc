@@ -12,9 +12,15 @@ interface PlaceDao {
     @Query("SELECT * FROM places WHERE searchQuery LIKE '%' || :query || '%' OR name LIKE '%' || :query || '%'")
     fun searchPlaces(query: String): Flow<List<PlaceEntity>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertPlaces(places: List<PlaceEntity>)
 
     @Query("SELECT * FROM places WHERE fsqId = :fsqId")
     suspend fun getPlaceById(fsqId: String): PlaceEntity?
+
+    @Query("UPDATE places SET isFavorite = :isFavorite WHERE fsqId = :fsqId")
+    suspend fun updateFavoriteStatus(fsqId: String, isFavorite: Boolean)
+
+    @Query("SELECT * FROM places WHERE isFavorite = 1")
+    fun getFavoritePlaces(): Flow<List<PlaceEntity>>
 }

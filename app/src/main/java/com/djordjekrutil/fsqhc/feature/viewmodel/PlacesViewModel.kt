@@ -9,12 +9,16 @@ import com.djordjekrutil.fsqhc.feature.model.Place
 import com.djordjekrutil.fsqhc.feature.repository.LocationRepository
 import com.djordjekrutil.fsqhc.feature.repository.PagedPlacesResult
 import com.djordjekrutil.fsqhc.feature.usecase.GetCurrentLocationUseCase
+import com.djordjekrutil.fsqhc.feature.usecase.GetFavoritePlacesUseCase
 import com.djordjekrutil.fsqhc.feature.usecase.SearchPlacesUseCase
+import com.djordjekrutil.fsqhc.feature.usecase.SetFavoritePlaceUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,6 +26,8 @@ import javax.inject.Inject
 class PlacesViewModel @Inject constructor(
     private val searchPlacesUseCase: SearchPlacesUseCase,
     private val getCurrentLocationUseCase: GetCurrentLocationUseCase,
+    private val setFavoritePlaceUseCase: SetFavoritePlaceUseCase,
+    private val getFavoritePlacesUseCase: GetFavoritePlacesUseCase,
     private val locationRepository: LocationRepository
 ) : ViewModel() {
 
@@ -29,18 +35,23 @@ class PlacesViewModel @Inject constructor(
     val uiState: StateFlow<PlacesScreenState> = _uiState.asStateFlow()
 
     private val _places = MutableStateFlow<List<Place>>(emptyList())
+    private var _favoritesPlaces = MutableStateFlow<List<Place>>(emptyList())
 
     private val _hasNextPage = MutableStateFlow(false)
     val hasNextPage: StateFlow<Boolean> = _hasNextPage
 
-    private var currentQuery : String? = null
+    private var currentQuery: String? = null
     private var nextCursor: String? = null
 
     private var currentLocation: Location? = null
     private var loadingMoreInProgress = false
 
+    private fun hasValidLocation(): Boolean = currentLocation != null
+
     init {
         initializeLocationCheck()
+        getFavoritesPlaces()
+        syncFavorites()
     }
 
     private fun initializeLocationCheck() {
@@ -64,11 +75,15 @@ class PlacesViewModel @Inject constructor(
     }
 
     private fun getCurrentLocation() {
-        updateState(PlacesScreenState.LoadingLocation)
-
-        viewModelScope.launch {
-            val result = getCurrentLocationUseCase.run(UseCase.None())
-            handleLocationResult(result)
+        if (_places.value.isNotEmpty()) {
+            updateState(PlacesScreenState.Content(_places))
+            return
+        } else {
+            updateState(PlacesScreenState.LoadingLocation)
+            viewModelScope.launch {
+                val result = getCurrentLocationUseCase.run(UseCase.None())
+                handleLocationResult(result)
+            }
         }
     }
 
@@ -77,6 +92,7 @@ class PlacesViewModel @Inject constructor(
             is Either.Left -> {
                 updateState(PlacesScreenState.Error(PlacesError.Location.FailedToGetLocation))
             }
+
             is Either.Right -> {
                 currentLocation = result.b
                 updateState(PlacesScreenState.ReadyForSearch)
@@ -91,16 +107,16 @@ class PlacesViewModel @Inject constructor(
             !hasValidLocation() -> {
                 updateState(PlacesScreenState.Error(PlacesError.Location.NotAvailable))
             }
+
             trimmedQuery.isBlank() -> {
                 updateState(PlacesScreenState.ReadyForSearch)
             }
+
             else -> {
                 performSearch(trimmedQuery)
             }
         }
     }
-
-    private fun hasValidLocation(): Boolean = currentLocation != null
 
     private fun performSearch(query: String) {
         val location = currentLocation ?: return
@@ -123,7 +139,8 @@ class PlacesViewModel @Inject constructor(
 
         viewModelScope.launch {
             loadingMoreInProgress = true
-            val params = SearchPlacesUseCase.Params(query, location.latitude, location.longitude, nextCursor)
+            val params =
+                SearchPlacesUseCase.Params(query, location.latitude, location.longitude, nextCursor)
             val result = searchPlacesUseCase.run(params)
             handleMoreItemsResult(result)
         }
@@ -134,11 +151,13 @@ class PlacesViewModel @Inject constructor(
             is Either.Right -> {
                 viewModelScope.launch {
                     _places.value = result.b.places.first()
+                    syncFavorites()
                     updateState(PlacesScreenState.Content(_places))
                     _hasNextPage.value = !result.b.nextCursor.isNullOrEmpty()
                     nextCursor = result.b.nextCursor
                 }
             }
+
             is Either.Left -> {
                 updateState(PlacesScreenState.Error(PlacesError.SearchFailed))
                 _hasNextPage.value = false
@@ -152,12 +171,14 @@ class PlacesViewModel @Inject constructor(
             is Either.Right -> {
                 viewModelScope.launch {
                     _places.value = _places.value + result.b.places.first()
+                    syncFavorites()
                     updateState(PlacesScreenState.Content(_places))
                     _hasNextPage.value = !result.b.nextCursor.isNullOrEmpty()
                     nextCursor = result.b.nextCursor
                     loadingMoreInProgress = false
                 }
             }
+
             is Either.Left -> {
                 _hasNextPage.value = false
                 nextCursor = ""
@@ -168,6 +189,60 @@ class PlacesViewModel @Inject constructor(
 
     fun retryLocation() {
         getCurrentLocation()
+    }
+
+    private fun getFavoritesPlaces() {
+        viewModelScope.launch {
+            val result = getFavoritePlacesUseCase.run(UseCase.None())
+            handleFavoritesPlacesResult(result)
+        }
+    }
+
+    private fun handleFavoritesPlacesResult(result: Either<*, Flow<List<Place>>>) {
+        when (result) {
+            is Either.Right -> {
+                viewModelScope.launch {
+                    result.b.collect { places ->
+                        _favoritesPlaces.value = places
+                    }
+                }
+            }
+
+            is Either.Left -> {}
+        }
+    }
+
+    fun toggleFavorite(fsqId: String, isFavorite: Boolean) {
+        viewModelScope.launch {
+            var params = SetFavoritePlaceUseCase.Params.create(fsqId, isFavorite)
+            setFavoritePlaceUseCase(params)
+            _places.update { list ->
+                list.map { place ->
+                    if (place.fsqId == fsqId) place.copy(isFavorite = isFavorite) else place
+                }
+            }
+            updateState(PlacesScreenState.Content(_places))
+        }
+    }
+
+    private fun syncFavorites() {
+        viewModelScope.launch {
+            if (_places.value.isNotEmpty())
+            {
+                _favoritesPlaces.collect { dbFavoritesList ->
+                    val favoriteIds = dbFavoritesList
+                        .map { it.fsqId }
+                        .toSet()
+
+                    val updatedList = _places.value.map { place ->
+                        place.copy(isFavorite = place.fsqId in favoriteIds)
+                    }
+
+                    _places.value = updatedList
+                    updateState(PlacesScreenState.Content(_places))
+                }
+            }
+        }
     }
 
     private fun updateState(newState: PlacesScreenState) {
@@ -192,5 +267,6 @@ sealed class PlacesError {
         data object FailedToGetLocation : Location()
         data object NotAvailable : Location()
     }
+
     data object SearchFailed : PlacesError()
 }

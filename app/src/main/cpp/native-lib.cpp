@@ -21,13 +21,13 @@ const size_t ENCRYPTED_API_URL_SIZE = 37;
 const std::string ENCRYPTION_KEY = "o3o3dk2oo3mko6o5dk";
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_djordjekrutil_fsqhc_core_util_ApiKeyManager_getApiKey(JNIEnv *env, jobject thiz) {
+Java_com_djordjekrutil_fsqhc_core_util_ApiKeyManager_getApiKey(JNIEnv *env, jobject manager) {
     std::string decrypted = decrypt(ENCRYPTED_API_KEY, ENCRYPTED_API_KEY_SIZE, ENCRYPTION_KEY);
     return env->NewStringUTF(decrypted.c_str());
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_djordjekrutil_fsqhc_core_util_ApiKeyManager_getApiUrl(JNIEnv *env, jobject thiz) {
+Java_com_djordjekrutil_fsqhc_core_util_ApiKeyManager_getApiUrl(JNIEnv *env, jobject manager) {
     std::string decrypted = decrypt(ENCRYPTED_API_URL, ENCRYPTED_API_URL_SIZE, ENCRYPTION_KEY);
     return env->NewStringUTF(decrypted.c_str());
 }

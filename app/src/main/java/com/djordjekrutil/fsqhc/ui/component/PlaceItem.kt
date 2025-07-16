@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Star
@@ -35,6 +37,7 @@ import com.djordjekrutil.fsqhc.feature.model.Place
 fun PlaceItem(
     place: Place,
     onClick: () -> Unit,
+    onFavoritesClick: (String, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -103,8 +106,11 @@ fun PlaceItem(
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.FavoriteBorder,
-                    contentDescription = "Favorite"
+                    imageVector = if (place.isFavorite) Icons.Outlined.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = "Favorite",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable { onFavoritesClick(place.fsqId, !place.isFavorite) },
                 )
 
                 Spacer(modifier = Modifier.height(48.dp))

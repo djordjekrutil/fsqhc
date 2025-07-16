@@ -13,5 +13,6 @@ data class PlaceEntity(
     val categories: String?,
     val distance: Int?,
     val searchQuery: String,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    val isFavorite: Boolean = false
 )

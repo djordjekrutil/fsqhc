@@ -33,7 +33,10 @@ fun BottomBar(
                     selected = currentDestination?.route == screen.route,
                     onClick = {
                         if (currentDestination?.route != screen.route) {
-                            navController.navigate(screen.route)
+                            navController.navigate(screen.route) {
+                                popUpTo(Screens.Search.route) { inclusive = false }
+                                launchSingleTop = true
+                            }
                         }
                     },
                     icon = { Icon(screen.icon, contentDescription = null) },
