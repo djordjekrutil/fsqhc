@@ -21,6 +21,12 @@ ksp = "2.0.21-1.0.25"
 room = "2.6.1"
 gson = "2.10.1"
 playServicesLocation = "21.3.0"
+timber = "5.0.1"
+mockito = "5.8.0"
+mockitoKotlin = "5.2.1"
+coroutinesTest = "1.8.1"
+turbine = "1.1.0"
+kotlinTest = "1.9.22"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -64,6 +70,15 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 # Gson for JSON parsing
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+# Timber for logging
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+
+# Test dependencies
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlinTest" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

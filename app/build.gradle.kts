@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -9,7 +11,7 @@ plugins {
 
 android {
     namespace = "com.djordjekrutil.fsqhc"
-    compileSdk = 35
+    compileSdk = 36
 
     lint {
         disable.addAll(listOf("NullSafeMutableLiveData"))
@@ -23,23 +25,19 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        ndk {
-            abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64"))
-        }
-
-        externalNativeBuild {
-            cmake {
-                cppFlags.add("-std=c++14")
+        val localProperties = Properties().apply {
+            val localPropertiesFile = rootProject.file("local.properties")
+            if (localPropertiesFile.exists()) {
+                load(localPropertiesFile.inputStream())
             }
         }
-    }
 
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
+        buildConfigField("String", "FOURSQUARE_API_KEY", "\"${localProperties.getProperty("FOURSQUARE_API_KEY", "")}\"")
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary = true
         }
     }
 
@@ -79,6 +77,11 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.play.services.location)
     testImplementation(libs.junit)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
+    testImplementation(libs.kotlin.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -115,5 +118,9 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
+    //Timber
+    implementation(libs.timber)
+
+    // Accompanist
     implementation (libs.accompanist.permissions)
 }

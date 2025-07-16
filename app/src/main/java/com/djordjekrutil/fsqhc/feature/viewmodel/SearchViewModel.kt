@@ -5,9 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.djordjekrutil.fsqhc.core.functional.Either
 import com.djordjekrutil.fsqhc.core.interactor.UseCase
+import com.djordjekrutil.fsqhc.feature.model.PagedPlacesResult
 import com.djordjekrutil.fsqhc.feature.model.Place
 import com.djordjekrutil.fsqhc.feature.repository.LocationRepository
-import com.djordjekrutil.fsqhc.feature.repository.PagedPlacesResult
 import com.djordjekrutil.fsqhc.feature.usecase.GetCurrentLocationUseCase
 import com.djordjekrutil.fsqhc.feature.usecase.GetFavoritePlacesUseCase
 import com.djordjekrutil.fsqhc.feature.usecase.SearchPlacesUseCase
@@ -214,7 +214,7 @@ class PlacesViewModel @Inject constructor(
 
     fun toggleFavorite(fsqId: String, isFavorite: Boolean) {
         viewModelScope.launch {
-            var params = SetFavoritePlaceUseCase.Params.create(fsqId, isFavorite)
+            val params = SetFavoritePlaceUseCase.Params.create(fsqId, isFavorite)
             setFavoritePlaceUseCase(params)
             _places.update { list ->
                 list.map { place ->

@@ -6,14 +6,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.CardDefaults
 
 @Composable
 fun LoadingPlaceItem(modifier: Modifier = Modifier) {
@@ -47,27 +49,22 @@ fun LoadingPlaceItem(modifier: Modifier = Modifier) {
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         border = BorderStroke(0.5.dp, Color.LightGray),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
     ) {
         Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = androidx.compose.ui.Alignment.Top
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.Top,
         ) {
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(80.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(brush)
             )
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Box(
                     modifier = Modifier
                         .height(20.dp)
@@ -76,7 +73,7 @@ fun LoadingPlaceItem(modifier: Modifier = Modifier) {
                         .background(brush)
                 )
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Box(
                     modifier = Modifier
@@ -86,31 +83,69 @@ fun LoadingPlaceItem(modifier: Modifier = Modifier) {
                         .background(brush)
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
-                Box(
-                    modifier = Modifier
-                        .height(14.dp)
-                        .fillMaxWidth(0.4f)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(brush)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(brush)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
 
-                Spacer(modifier = Modifier.height(10.dp))
+                    Box(
+                        modifier = Modifier
+                            .height(14.dp)
+                            .width(30.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(brush)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
 
-                Box(
-                    modifier = Modifier
-                        .height(14.dp)
-                        .fillMaxWidth(0.5f)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(brush)
-                )
+                    Box(
+                        modifier = Modifier
+                            .height(14.dp)
+                            .width(20.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(brush)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(brush)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .height(14.dp)
+                            .width(40.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(brush)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .height(14.dp)
+                            .width(35.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(brush)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.width(8.dp))
 
             Column(
-                horizontalAlignment = androidx.compose.ui.Alignment.End,
+                horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Box(
@@ -124,8 +159,7 @@ fun LoadingPlaceItem(modifier: Modifier = Modifier) {
 
                 Box(
                     modifier = Modifier
-                        .height(14.dp)
-                        .width(40.dp)
+                        .size(24.dp)
                         .clip(RoundedCornerShape(4.dp))
                         .background(brush)
                 )

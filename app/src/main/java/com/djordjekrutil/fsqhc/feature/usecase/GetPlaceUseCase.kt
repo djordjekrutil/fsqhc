@@ -12,7 +12,7 @@ class GetPlaceUseCase @Inject constructor(
 ) : UseCase<Place, GetPlaceUseCase.Params>() {
 
     override suspend fun run(params: Params): Either<Failure, Place> {
-        return placesRepository.getPlace(params.fsqId)
+        return placesRepository.getPlaceDetails(params.fsqId)
     }
 
     data class Params(val fsqId: String)

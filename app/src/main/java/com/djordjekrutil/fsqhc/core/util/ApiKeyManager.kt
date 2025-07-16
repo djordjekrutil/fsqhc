@@ -1,22 +1,14 @@
 package com.djordjekrutil.fsqhc.core.util
 
-class ApiKeyManager {
+import com.djordjekrutil.fsqhc.BuildConfig
 
-    external fun getApiKey(): String
-    external fun getApiUrl(): String
+object ApiKeyManager {
 
-    companion object {
-        init {
-            System.loadLibrary("foursquarekeys")
-        }
+    fun getApiKey(): String {
+        return BuildConfig.FOURSQUARE_API_KEY
+    }
 
-        @Volatile
-        private var INSTANCE: ApiKeyManager? = null
-
-        fun getInstance(): ApiKeyManager {
-            return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: ApiKeyManager().also { INSTANCE = it }
-            }
-        }
+    fun getApiUrl(): String {
+        return "https://api.foursquare.com/"
     }
 }

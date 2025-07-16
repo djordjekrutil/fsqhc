@@ -8,7 +8,7 @@ import com.djordjekrutil.fsqhc.feature.db.dao.PlaceDao
 import com.djordjekrutil.fsqhc.feature.model.PlaceEntity
 
 @Database(
-    entities = arrayOf(PlaceEntity::class), version = 1, exportSchema = false
+    entities = [PlaceEntity::class], version = 1, exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 

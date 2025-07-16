@@ -14,8 +14,7 @@ class GetFavoritePlacesUseCase @Inject constructor(
 
     override suspend fun run(params: None): Either<Failure, Flow<List<Place>>> {
         return try {
-            val favorites: Flow<List<Place>> = placesRepository.getFavoritePlaces()
-            Either.Right(favorites)
+            Either.Right(placesRepository.getFavoritePlaces())
         } catch (_: Exception) {
             Either.Left(Failure.DatabaseError)
         }

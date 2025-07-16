@@ -10,9 +10,16 @@ data class PlaceEntity(
     val address: String?,
     val latitude: Double?,
     val longitude: Double?,
-    val categories: String?,
+    val categories: String?, // JSON string
     val distance: Int?,
     val searchQuery: String,
     val timestamp: Long = System.currentTimeMillis(),
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val rating: Double? = null,
+    val price: Int? = null,
+    val isOpen: Boolean? = null,
+    val photoUrl: String? = null,
+    val detailsJson: String? = null, // Serialized PlaceDetails
+    val hasFullDetails: Boolean = false,
+    val detailsLastUpdated: Long? = null
 )

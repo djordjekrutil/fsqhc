@@ -9,7 +9,13 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PlaceDao {
-    @Query("SELECT * FROM places WHERE searchQuery LIKE '%' || :query || '%' OR name LIKE '%' || :query || '%'")
+    @Query(
+        """
+        SELECT * FROM places
+        WHERE searchQuery LIKE '%' || :query || '%'
+        OR name LIKE '%' || :query || '%'
+    """
+    )
     fun searchPlaces(query: String): Flow<List<PlaceEntity>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)

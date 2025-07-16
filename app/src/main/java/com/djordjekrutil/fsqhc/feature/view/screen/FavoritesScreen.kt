@@ -2,6 +2,7 @@ package com.djordjekrutil.fsqhc.feature.view.screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
@@ -12,11 +13,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.djordjekrutil.fsqhc.R
 import com.djordjekrutil.fsqhc.feature.viewmodel.FavoritesScreenState
 import com.djordjekrutil.fsqhc.feature.viewmodel.FavoritesViewModel
 import com.djordjekrutil.fsqhc.ui.component.CenteredContent
+import com.djordjekrutil.fsqhc.ui.component.NoFavoritesState
 import com.djordjekrutil.fsqhc.ui.component.NoSearchResultsState
 import com.djordjekrutil.fsqhc.ui.component.PlaceItem
 
@@ -31,15 +35,16 @@ fun FavoritesScreen(
         when (state) {
             FavoritesScreenState.Loading,
             FavoritesScreenState.Initial -> {
-                CenteredContent { CircularProgressIndicator() }
+                NoFavoritesState()
             }
 
             FavoritesScreenState.Error -> {
                 CenteredContent {
                     Text(
                         text = stringResource(R.string.failed_to_load_favorites),
+                        textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.titleLarge
                     )
                 }
             }
@@ -52,6 +57,13 @@ fun FavoritesScreen(
                     }
                 } else {
                     LazyColumn {
+                        item {
+                            Text(
+                                text = stringResource(R.string.your_favorites),
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
                         items(places, key = { place -> place.fsqId }) { place ->
                             PlaceItem(
                                 place = place,
@@ -64,13 +76,7 @@ fun FavoritesScreen(
             }
 
             FavoritesScreenState.Empty -> {
-                CenteredContent {
-                    Text(
-                        text = stringResource(R.string.add_places_to_your_favorites_to_see_them_here),
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
+                NoFavoritesState()
             }
 
             FavoritesScreenState.Initial -> {

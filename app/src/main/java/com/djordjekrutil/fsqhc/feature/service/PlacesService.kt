@@ -1,7 +1,7 @@
 package com.djordjekrutil.fsqhc.feature.service
 
 import com.djordjekrutil.fsqhc.feature.model.FoursquareResponse
-import com.djordjekrutil.fsqhc.feature.model.PlaceDto
+import com.djordjekrutil.fsqhc.feature.model.PlaceDetailsDto
 import com.djordjekrutil.fsqhc.feature.service.api.PlacesAPI
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -17,12 +17,14 @@ class PlacesService
     override suspend fun searchPlaces(
         query: String,
         ll: String,
-        nextCursor: String?
+        nextCursor: String?,
+        fields: String
     ): Response<FoursquareResponse> = placesApi.searchPlaces(
         query,
         ll,
         nextCursor
     )
 
-    override suspend fun getPlace(fsqId: String): Response<PlaceDto> = placesApi.getPlace(fsqId)
+    override suspend fun getPlace(fsqId: String, fields: String): Response<PlaceDetailsDto> =
+        placesApi.getPlace(fsqId)
 }

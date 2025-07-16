@@ -4,7 +4,7 @@ package com.djordjekrutil.fsqhc.feature.usecase
 import com.djordjekrutil.fsqhc.core.exception.Failure
 import com.djordjekrutil.fsqhc.core.functional.Either
 import com.djordjekrutil.fsqhc.core.interactor.UseCase
-import com.djordjekrutil.fsqhc.feature.repository.PagedPlacesResult
+import com.djordjekrutil.fsqhc.feature.model.PagedPlacesResult
 import com.djordjekrutil.fsqhc.feature.repository.PlacesRepository
 import javax.inject.Inject
 

@@ -1,22 +1,20 @@
 package com.djordjekrutil.fsqhc.ui.component
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import com.djordjekrutil.fsqhc.R
 
 @Composable
 fun NoFavoritesState() {
-    Box(
-        Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text("You haven't added any favorites yet.")
+    CenteredContent {
+        Text(
+            text = stringResource(R.string.add_places_to_your_favorites_to_see_them_here),
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.secondary,
+            style = MaterialTheme.typography.titleLarge,
+        )
     }
 }

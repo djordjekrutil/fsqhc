@@ -9,4 +9,9 @@ data class Place(
     val categories: List<String>,
     val distance: Int?,
     val isFavorite: Boolean,
+    val rating: Double? = null,
+    val price: Int? = null,
+    val isOpen: Boolean? = null,
+    val photoUrl: String? = null,
+    val details: PlaceDetails? = null
 )

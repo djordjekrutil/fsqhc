@@ -2,11 +2,8 @@ package com.djordjekrutil.fsqhc.core.interactor
 
 import com.djordjekrutil.fsqhc.core.exception.Failure
 import com.djordjekrutil.fsqhc.core.functional.Either
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 /**
@@ -21,10 +18,10 @@ abstract class UseCase<out Type, in Params> where Type : Any {
 
     abstract suspend fun run(params: Params): Either<Failure, Type>
 
-    @OptIn(DelicateCoroutinesApi::class)
-    operator fun invoke(params: Params, onResult: (Either<Failure, Type>) -> Unit = {}) {
-        val job = GlobalScope.async(Dispatchers.Default) { run(params) }
-        GlobalScope.launch(Dispatchers.Main) { onResult(job.await()) }
+    suspend operator fun invoke(params: Params): Either<Failure, Type> {
+        return withContext(Dispatchers.IO) {
+            run(params)
+        }
     }
 
     class None
